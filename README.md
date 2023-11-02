@@ -1,5 +1,7 @@
 ![image](https://github.com/wyvernbw/tracer.gd/assets/50150016/d21f8f04-c907-41a5-a1a2-50d020e54190)
 # ![image](https://github.com/wyvernbw/tracer.gd/assets/50150016/652804f5-df97-4624-ae21-df08cdb13fb3) tracer.gd
+> *Sprite is from Terraria*  
+
 **Tracer** is an addon for godot 4 for structured, customizable traces, heavily inspired by [tracing](https://github.com/tokio-rs/tracing).
 
 ## ✨ Features

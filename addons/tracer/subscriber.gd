@@ -9,7 +9,7 @@ var print_function := true
 var print_timestamp := true
 var print_thread_id := false
 var writer: Callable = print_stump
-
+var filter: int = ~0
 
 func init() -> void:
 	Tracer.add_child(self)
@@ -22,6 +22,8 @@ func print_stump(text: String) -> void:
 
 func on_entered_span() -> void:
 	var span: Tracer.Trace = Tracer.current_span
+	if span.level & filter == 0:
+		return
 	var text = span.msg
 	var level_str = (
 		Tracer.level_colored
@@ -103,6 +105,11 @@ func barebones() -> TraceSubscriber:
 		. with_timestamp(true)
 		. with_thread_id(false)
 	)
+
+
+func with_filter(new_filter: int) -> TraceSubscriber:
+	filter = new_filter
+	return self
 
 
 func with_writer(writer: Callable) -> TraceSubscriber:

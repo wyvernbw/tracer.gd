@@ -1,5 +1,7 @@
 extends Node2D
 
+# Shorthand
+const Level = Tracer.Level
 
 func _ready():
 	# Build a subscriber with all the bells and whistles
@@ -10,6 +12,7 @@ func _ready():
 		. with_level(true)
 		. with_nicer_colors(false)
 		. with_timestamp(true)
+		. with_filter(Level.Info | Level.Warn | Level.Error | Level.Debug)
 	)
 	# Initialize the subscriber
 	subscriber.init()
@@ -32,3 +35,5 @@ func _ready():
 	Tracer.debug("Initializing systems... 🧙‍♂️")
 	Tracer.warn("Cannot find file 'data.json' 🤔")
 	Tracer.error("Cannot communicate with server 😱")
+	# This will not be printed
+	Tracer.trace("This is a trace message 🕵️‍♂️")

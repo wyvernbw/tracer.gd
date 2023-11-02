@@ -3,11 +3,11 @@ extends Node
 signal entered_span
 
 enum Level {
-	Error,
-	Warn,
-	Info,
-	Debug,
-	Trace,
+	Error = 1,
+	Warn = 2,
+	Info = 4,
+	Debug = 8,
+	Trace = 16,
 }
 
 
@@ -73,7 +73,19 @@ func trace(msg: String) -> void:
 
 
 static func level_string(level: Level) -> String:
-	return Level.keys()[level].to_upper()
+	match level:
+		Level.Info:
+			return "INFO"
+		Level.Debug:
+			return "DEBUG"
+		Level.Warn:
+			return "WARN"
+		Level.Error:
+			return "ERROR"
+		Level.Trace:
+			return "TRACE"
+		_:
+			return "UNKNOWN"
 
 
 static func level_colored(level: Level) -> String:

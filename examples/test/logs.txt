@@ -1,0 +1,5 @@
+[2023-11-02T13:22:52] INFO examples/test/test.gd::_ready: Game Started!
+[2023-11-02T13:22:52] DEBUG examples/test/test.gd::_ready: Initializing systems... 🧙‍♂️
+[2023-11-02T13:22:52] WARN examples/test/test.gd::_ready: Cannot find file 'data.json' 🤔
+[2023-11-02T13:22:52] ERROR examples/test/test.gd::_ready: Cannot communicate with server 😱
+[2023-11-02T13:22:52] TRACE examples/test/test.gd::_ready: This is a trace message 🕵️‍♂️

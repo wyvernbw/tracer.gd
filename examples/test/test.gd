@@ -8,7 +8,7 @@ func _ready():
 		. new()
 		. with_colored_output(true)
 		. with_level(true)
-		. with_nicer_colors(true)
+		. with_nicer_colors(false)
 		. with_timestamp(true)
 	)
 	# Initialize the subscriber

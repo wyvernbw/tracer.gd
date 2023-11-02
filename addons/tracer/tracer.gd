@@ -84,7 +84,7 @@ static func level_colored(level: Level) -> String:
 		Level.Debug:
 			color = "[color=blue]%s[/color]"
 		Level.Warn:
-			color = "[color=orange]%s[/color]"
+			color = "[color=yellow]%s[/color]"
 		Level.Error:
 			color = "[color=red]%s[/color]"
 		Level.Trace:

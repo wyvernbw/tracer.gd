@@ -46,10 +46,11 @@ func on_entered_span() -> void:
 		var module_name = span.module
 		if use_colored_output:
 			module_name = (gray % module_name)
-		var separator = (gray % "::") if print_function else ""
+		var separator = (gray % "::") if print_function else ": "
 		text = module_name + separator + text
 	if print_level:
-		text = level_str.call(span.level) + ": " + text
+		var separator = ": " if not (print_module or print_function) else " "
+		text = level_str.call(span.level) + separator + text
 	if print_timestamp:
 		text = "[%s] " % span.timestamp + text
 	if print_thread_id:

@@ -7,7 +7,7 @@
 * Colored output
 * Useful information such as the script a span is located in, the current thread id and timestamps
 * Modular design
-* Support for custom writers (more on that later)
+* [Support for custom writers](https://github.com/wyvernbw/tracer.gd/wiki/Saving-logs-to-a-file)
 
 ## 🧙‍♂️ How it works
 The `Tracer` autoload stores traces that are then consumed by subscribers. This addond includes a default subscriber in the form of `TraceSubscriber`. Users are free to implement their own subscribers. Multiple subscribers can run in parallel to log spans with different settings. 

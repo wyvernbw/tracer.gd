@@ -81,6 +81,32 @@ static func level_colored(level: Level) -> String:
 	match level:
 		Level.Info:
 			color = "[color=green]%s[/color]"
+		Level.Debug:
+			color = "[color=blue]%s[/color]"
+		Level.Warn:
+			color = "[color=orange]%s[/color]"
+		Level.Error:
+			color = "[color=red]%s[/color]"
+		Level.Trace:
+			color = "[color=magenta]%s[/color]"
+		_:
+			color = "[color=white]%s[/color]"
+	return color % level_string(level)
+
+
+static func level_colored_nice(level: Level) -> String:
+	var color = ""
+	match level:
+		Level.Info:
+			color = "[color=greenyellow]%s[/color]"
+		Level.Debug:
+			color = "[color=dodgerblue]%s[/color]"
+		Level.Warn:
+			color = "[color=gold]%s[/color]"
+		Level.Error:
+			color = "[color=orangered]%s[/color]"
+		Level.Trace:
+			color = "[color=maroon]%s[/color]"
 		_:
 			color = "[color=white]%s[/color]"
 	return color % level_string(level)

@@ -17,6 +17,11 @@ public partial class StackHandler : GodotObject
 			// i.e. remove "C:/GodotProjects/Game" from "C:/GodotProjects/Game/Scenes/Main/Main.cs"
 			// ProjectSettings.LocalizePath(...) doesn't seem to work.
 			modulePath = modulePath.Substring(rootDir.Length);
+			// Also convert Windows-style backslashes to Godot standard forward slashes if present.
+			if (modulePath.Contains("\\"))
+			{
+				modulePath = modulePath.Replace("\\", "/");
+			}
 		}
 		return modulePath;
 	}

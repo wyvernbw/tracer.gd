@@ -27,19 +27,18 @@ class Trace:
 	) -> void:
 		self.msg = msg
 		self.level = level
-		if _has_mono:
+		var st = get_stack()
+		if st.size() > 2:
+			module = st[2].source.trim_prefix("res://")
+			function_name = st[2].function
+		elif _has_mono:
 			# C#-specific stack handling
 			var mono_sh_script = load("res://addons/tracer/StackHandler.cs")
 			var mono_stack_handler = mono_sh_script.new()
 			module = mono_stack_handler.GetModulePath()
 			function_name = mono_stack_handler.GetFunctionName()
 		else:
-			var st = get_stack()
-			if st.size() > 2:
-				module = st[2].source.trim_prefix("res://")
-				function_name = st[2].function
-			else:
-				function_name = "unknown"
+			function_name = "unknown"
 		thread_id = new_thread_id
 
 

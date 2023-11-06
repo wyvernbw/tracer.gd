@@ -20,6 +20,7 @@ class Trace:
 		Time.get_datetime_string_from_system()
 	)
 	var thread_id := 1
+	var _has_mono: bool = Engine.has_singleton("GodotSharp")
 
 	func _init(
 		msg: String, level: Level, new_thread_id := 0
@@ -30,6 +31,12 @@ class Trace:
 		if st.size() > 2:
 			module = st[2].source.trim_prefix("res://")
 			function_name = st[2].function
+		elif _has_mono:
+			# C#-specific stack handling
+			var mono_sh_script = load("res://addons/tracer/StackHandler.cs")
+			var mono_stack_handler = mono_sh_script.new()
+			module = mono_stack_handler.GetModulePath()
+			function_name = mono_stack_handler.GetFunctionName()
 		else:
 			function_name = "unknown"
 		thread_id = new_thread_id

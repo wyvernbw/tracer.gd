@@ -10,7 +10,7 @@ func _ready():
 		. new()
 		. with_colored_output(true)
 		. with_level(true)
-		. with_nicer_colors(false)
+		. with_nicer_colors(true)
 		. with_timestamp(true)
 		. with_filter(Level.Info | Level.Warn | Level.Error | Level.Debug)
 	)

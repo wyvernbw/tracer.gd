@@ -51,14 +51,16 @@ class Trace:
 	var timestamp: String = (
 		Time.get_datetime_string_from_system()
 	)
+	var fields := {}
 	var thread_id := 1
 	var _has_mono: bool = Engine.has_singleton("GodotSharp")
 
 	func _init(
-		msg: String, level: Level, new_thread_id := 0
+		msg: String, level: Level, new_thread_id := 0, fields := {}
 	) -> void:
 		self.msg = msg
 		self.level = level
+		self.fields = fields
 		var st = get_stack()
 		if st.size() > 2:
 			module = st[2].source.trim_prefix("res://")
@@ -83,32 +85,31 @@ func set_current_event(event: Trace) -> void:
 	sent_event.emit()
 
 
-func info(msg: String) -> void:
+func info(msg: String, fields := {}) -> void:
 	current_event = Trace.new(
-		msg, Level.Info, OS.get_thread_caller_id()
+		msg, Level.Info, OS.get_thread_caller_id(), fields
 	)
 
 
-func debug(msg: String) -> void:
+func debug(msg: String, fields := {}) -> void:
 	current_event = Trace.new(
-		msg, Level.Debug, OS.get_thread_caller_id()
+		msg, Level.Debug, OS.get_thread_caller_id(), fields
 	)
 
 
-func warn(msg: String) -> void:
+func warn(msg: String, fields := {}) -> void:
 	current_event = Trace.new(
-		msg, Level.Warn, OS.get_thread_caller_id()
+		msg, Level.Warn, OS.get_thread_caller_id(), fields
 	)
 
 
-func error(msg: String) -> void:
+func error(msg: String, fields := {}) -> void:
 	current_event = Trace.new(
 		msg, Level.Error, OS.get_thread_caller_id()
 	)
 
-
-func trace(msg: String) -> void:
-	current_event = Trace.new(msg, Level.Trace)
+func trace(msg: String, fields := {}) -> void:
+	current_event = Trace.new(msg, Level.Trace, OS.get_thread_caller_id(), fields)
 
 
 static func level_string(level: Level) -> String:

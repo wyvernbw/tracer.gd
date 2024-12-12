@@ -31,11 +31,11 @@ func _ready():
 	# Initialize the subscriber
 	file_logger.init()
 
-	var span = Tracer.span(Level.Info, "example").enter()
-	var child = Tracer.span(Level.Debug, "child").enter()
+	var span = Tracer.span(Level.Info, "example", {"step": "setup"}).enter()
+	var child = Tracer.span(Level.Debug, "child", {"work": "texture_loading"}).enter()
 
 	Tracer.info("Game Started!")
-	Tracer.debug("Initializing systems... 🧙‍♂️")
+	Tracer.debug("Initializing systems... 🧙‍♂️", {"system": "physics"})
 	Tracer.warn("Cannot find file 'data.json' 🤔")
 	child.exit()
 	Tracer.error("Cannot communicate with server 😱")

@@ -38,8 +38,12 @@ func on_sent_event() -> void:
 		else "[color=gray]%s[/color]"
 	)
 	var bold = "[b]%s[/b]"
+	var italics = "[i]%s[/i]"
 	if not use_colored_output:
 		gray = "%s"
+	for key in event.fields:
+		var value = event.fields[key]
+		text = italics % key + "=" + value + " " + text
 	if print_function:
 		var function_name = event.function_name
 		if use_colored_output:
@@ -63,7 +67,14 @@ func on_sent_event() -> void:
 			continue
 		if span.level > event.level:
 			continue
-		text = bold % span.name + ": " + text
+		var span_text = ""
+		if !span.fields.is_empty():
+			span_text += bold % "{"
+			for key in span.fields:
+				var value = span.fields[key]
+				span_text += italics % key + "=" + value + ", "
+			span_text = span_text.rstrip(", ") + bold % "}"
+		text = bold % span.name + span_text + ": " + text
 	if print_timestamp:
 		text = "%s " % event.timestamp + text
 	if print_thread_id:

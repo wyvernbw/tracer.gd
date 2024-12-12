@@ -13,18 +13,18 @@ var filter: int = ~0
 
 func init() -> void:
 	Tracer.add_child(self)
-	Tracer.entered_span.connect(on_entered_span)
+	Tracer.sent_event.connect(on_sent_event)
 
 
 func print_stump(text: String) -> void:
 	print_rich(text)
 
 
-func on_entered_span() -> void:
-	var span: Tracer.Trace = Tracer.current_span
-	if span.level & filter == 0:
+func on_sent_event() -> void:
+	var event: Tracer.Trace = Tracer.current_event
+	if event.level & filter == 0:
 		return
-	var text = span.msg
+	var text = event.msg
 	var level_str = (
 		Tracer.level_colored
 		if use_colored_output
@@ -37,26 +37,37 @@ func on_entered_span() -> void:
 		if use_nicer_colors
 		else "[color=gray]%s[/color]"
 	)
+	var bold = "[b]%s[/b]"
 	if not use_colored_output:
 		gray = "%s"
 	if print_function:
-		var function_name = span.function_name
+		var function_name = event.function_name
 		if use_colored_output:
 			function_name = (gray % function_name)
 		text = function_name + ": " + text
 	if print_module:
-		var module_name = span.module
+		var module_name = event.module
 		if use_colored_output:
 			module_name = (gray % module_name)
 		var separator = (gray % "::") if print_function else ": "
 		text = module_name + separator + text
 	if print_level:
 		var separator = ": " if not (print_module or print_function) else " "
-		text = level_str.call(span.level) + separator + text
+		text = level_str.call(event.level) + separator + text
+	for span in (
+		Tracer.span_stack
+			.map(func(s): return s.get_ref())
+			.filter(func(s): return s != null)
+	):
+		if span.level & filter == 0:
+			continue
+		if span.level > event.level:
+			continue
+		text = bold % span.name + ": " + text
 	if print_timestamp:
-		text = "[%s] " % span.timestamp + text
+		text = "%s " % event.timestamp + text
 	if print_thread_id:
-		text = "ThreadId(%s) " % span.thread_id + text
+		text = "ThreadId(%s) " % event.thread_id + text
 	writer.call(text)
 
 
@@ -98,12 +109,12 @@ func with_nicer_colors(displayed: bool) -> TraceSubscriber:
 func barebones() -> TraceSubscriber:
 	return (
 		self
-		. with_level(true)
-		. with_colored_output(false)
-		. with_module(true)
-		. with_function(true)
-		. with_timestamp(true)
-		. with_thread_id(false)
+		.with_level(true)
+		.with_colored_output(false)
+		.with_module(true)
+		.with_function(true)
+		.with_timestamp(true)
+		.with_thread_id(false)
 	)
 
 
@@ -120,4 +131,3 @@ func with_writer(writer: Callable) -> TraceSubscriber:
 static func writer_from_file(file: FileAccess) -> Callable:
 	return func(text: String) -> void:
 		file.store_string(text + "\n")
-

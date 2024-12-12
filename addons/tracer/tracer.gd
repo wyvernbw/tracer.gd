@@ -1,6 +1,6 @@
 extends Node
 
-signal entered_span
+signal sent_event
 
 enum Level {
 	Error = 1,
@@ -10,6 +10,38 @@ enum Level {
 	Trace = 16,
 }
 
+var span_stack := []
+
+class Span:
+	extends RefCounted
+
+	var level: Level
+	var name: String
+	var fields: Dictionary = {}
+	var parent: WeakRef = null
+
+	func _init(parent: Span, level: Level, name: String, fields := {}) -> void:
+		self.level = level
+		self.name = name
+		self.fields = fields
+		self.parent = weakref(parent)
+
+	func _notification(what):
+		if what == NOTIFICATION_PREDELETE:
+			Tracer.span_stack.pop_front()
+			#print_debug(Tracer.span_stack.map(func(s): return s.get_ref().name))
+
+	func enter() -> Span:
+		Tracer.span_stack.push_front(weakref(self))
+		#print_debug(Tracer.span_stack.map(func(s): return s.get_ref().name))
+		return self
+
+	func exit() -> void:
+		Tracer.span_stack.pop_front()
+		#print_debug(Tracer.span_stack.map(func(s): return s.get_ref().name))
+
+func span(level: Level, name: String, fields := {}) -> Span:
+	return Span.new(null if span_stack.is_empty() else span_stack.front().get_ref(), level, name, fields)
 
 class Trace:
 	var level: Level
@@ -42,41 +74,41 @@ class Trace:
 		thread_id = new_thread_id
 
 
-var current_span: Trace = null:
-	set = set_current_span
+var current_event: Trace = null:
+	set = set_current_event
 
 
-func set_current_span(span: Trace) -> void:
-	current_span = span
-	entered_span.emit()
+func set_current_event(event: Trace) -> void:
+	current_event = event
+	sent_event.emit()
 
 
 func info(msg: String) -> void:
-	current_span = Trace.new(
+	current_event = Trace.new(
 		msg, Level.Info, OS.get_thread_caller_id()
 	)
 
 
 func debug(msg: String) -> void:
-	current_span = Trace.new(
+	current_event = Trace.new(
 		msg, Level.Debug, OS.get_thread_caller_id()
 	)
 
 
 func warn(msg: String) -> void:
-	current_span = Trace.new(
+	current_event = Trace.new(
 		msg, Level.Warn, OS.get_thread_caller_id()
 	)
 
 
 func error(msg: String) -> void:
-	current_span = Trace.new(
+	current_event = Trace.new(
 		msg, Level.Error, OS.get_thread_caller_id()
 	)
 
 
 func trace(msg: String) -> void:
-	current_span = Trace.new(msg, Level.Trace)
+	current_event = Trace.new(msg, Level.Trace)
 
 
 static func level_string(level: Level) -> String:

@@ -11,6 +11,7 @@ enum Level {
 }
 
 var span_stack := []
+var default_span = span(Level.Info, "", {})
 
 class Span:
 	extends RefCounted
@@ -162,3 +163,125 @@ static func level_colored_nice(level: Level) -> String:
 		_:
 			color = "[color=white]%s[/color]"
 	return color % level_string(level)
+
+class Filter:
+	extends RefCounted
+
+	var module: String
+	var span_name: String
+	var fields := {}
+	var level: Level
+
+	func _init(module: String, span_name: String, level: Level, fields := {}) -> void:
+		self.module = module
+		self.span_name = span_name
+		self.fields = fields
+		self.level = level
+
+	enum Match {
+		False = 0,
+		Maybe = 1,
+		True = 2
+	}
+
+	func match_from_bool(b: bool) -> Match:
+		if b:
+			return Match.True
+		return Match.False
+
+	func matches(event: Trace, span: Span) -> bool:
+		var matches = {
+			"module": Match.Maybe,
+			"span": Match.Maybe,
+			"fields": Match.Maybe
+		}
+		matches.module = (
+			Match.Maybe if self.module == "" 
+			else match_from_bool(self.module == event.module)
+		)
+		matches.span = (
+			Match.Maybe if self.span_name == "" 
+			else match_from_bool(self.span_name == span.name)
+		)
+		for key in fields:
+			if not event.fields.has(key):
+				matches.fields = Match.Maybe
+				continue
+			if fields[key] != event.fields[key]:
+				matches.fields = Match.False
+		var res = (
+			matches.values().all(func(el): return el > Match.False)
+			or matches.values().any(func(el): return el == Match.True)
+		)
+		return res
+
+	func includes(other: Level) -> bool:
+		return other <= self.level
+
+	func _to_string() -> String:
+		return JSON.stringify({
+			"module": module,
+			"span": span_name,
+			"fields": fields,
+			"level": Level.find_key(level),
+		})
+
+
+
+func parse_filters(filter: String) -> Array:
+	var directives = (
+		Array(filter.split(","))
+			.filter(func(str): return not str.is_empty())
+			.map(parse_directive)
+			.filter(func(filter): return filter != null)
+	)
+	return directives
+
+func parse_fields(fields: String) -> Dictionary:
+	if not "{" in fields:
+		return {}
+	if not "}" in fields:
+		return {}
+	var str = fields.get_slice("{", 1).get_slice("}", 0) 
+	var kv_pairs = str.split(",")
+	var res = {}
+	for kv in kv_pairs:
+		if not "=" in kv:
+			continue
+		var kv_list = kv.split("=", false)
+		res[kv_list[0].strip_edges()] = kv_list[1].strip_edges()
+	return res
+
+func at(arr: Array, idx: int) -> Variant:
+	return arr[idx] if idx < arr.size() else null
+
+func parse_level(str: String) -> Level:
+	match str:
+		"debug", "DEBUG":
+			return Level.Debug
+		"info", "INFO":
+			return Level.Info
+		"warn", "WARN":
+			return Level.Warn
+		"error", "ERROR":
+			return Level.Error
+		_:
+			return Level.Trace
+
+func parse_directive(str: String) -> Filter:
+	var parts = str.rsplit("=", false, 1)
+	var part0 = at(parts, 0)
+	var part1 = at(parts, 1)
+	if part1:
+		var inside = part0.get_slice("[", 1).get_slice("]", 0)
+		var span
+		if "{" in inside:
+			span = inside.get_slice("{", 0)
+		else:
+			span = inside
+		var fields = parse_fields(inside)
+		var level = parse_level(part1)
+		var module = part0.get_slice("[", 0) if "[" in part0 else part0
+		return Filter.new(module, span, level, fields)
+	else:
+		return Filter.new("", "", parse_level(part0), {})

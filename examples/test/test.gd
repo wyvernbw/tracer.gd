@@ -12,7 +12,6 @@ func _ready():
 		.with_level(true)
 		.with_nicer_colors(true)
 		.with_timestamp(true)
-		.with_filter(Level.Info | Level.Warn | Level.Error | Level.Debug)
 	)
 	# Initialize the subscriber
 	subscriber.init()
@@ -30,6 +29,10 @@ func _ready():
 	)
 	# Initialize the subscriber
 	file_logger.init()
+
+	var filters = Tracer.parse_filters("info,[example]=debug")
+	print_debug(filters)
+	subscriber.with_filters(filters)
 
 	var span = Tracer.span(Level.Info, "example", {"step": "setup"}).enter()
 	var child = Tracer.span(Level.Debug, "child", {"work": "texture_loading"}).enter()

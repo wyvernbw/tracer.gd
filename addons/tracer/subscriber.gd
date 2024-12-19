@@ -9,7 +9,7 @@ var print_function := true
 var print_timestamp := true
 var print_thread_id := false
 var writer: Callable = print_stump
-var filter: int = ~0
+var filter_layers := []
 
 func init() -> void:
 	Tracer.add_child(self)
@@ -19,11 +19,24 @@ func init() -> void:
 func print_stump(text: String) -> void:
 	print_rich(text)
 
+func with_filter(filter: Tracer.Filter) -> TraceSubscriber:
+	filter_layers.append(filter)
+	return self
+
+func with_filters(filters: Array) -> TraceSubscriber:
+	filter_layers = filters
+	return self
 
 func on_sent_event() -> void:
 	var event: Tracer.Trace = Tracer.current_event
-	if event.level & filter == 0:
-		return
+	if not filter_layers.is_empty():
+		if not filter_layers.any(
+			func(f):
+				return Tracer.span_stack.any(
+					func(span): return f.matches(event, span)
+					)
+				):
+			return
 	var text = event.msg
 	var level_str = (
 		Tracer.level_colored
@@ -63,8 +76,6 @@ func on_sent_event() -> void:
 			.map(func(s): return s.get_ref())
 			.filter(func(s): return s != null)
 	):
-		if span.level & filter == 0:
-			continue
 		if span.level > event.level:
 			continue
 		var span_text = ""
@@ -127,11 +138,6 @@ func barebones() -> TraceSubscriber:
 		.with_timestamp(true)
 		.with_thread_id(false)
 	)
-
-
-func with_filter(new_filter: int) -> TraceSubscriber:
-	filter = new_filter
-	return self
 
 
 func with_writer(writer: Callable) -> TraceSubscriber:

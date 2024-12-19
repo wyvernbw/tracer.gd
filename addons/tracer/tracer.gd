@@ -162,3 +162,54 @@ static func level_colored_nice(level: Level) -> String:
 		_:
 			color = "[color=white]%s[/color]"
 	return color % level_string(level)
+
+class Filter:
+	extends RefCounted
+
+	var module: String
+	var span_name: String
+	var fields := {}
+	var level: Level
+
+	func _init(module: String, span_name: String, level: Level, fields := {}) -> void:
+		self.module = module
+		self.span_name = span_name
+		self.fields = fields
+		self.level = level
+
+	func matches(event: Trace, span: Span) -> bool:
+		if module != "" and module != event.module:
+			return false
+		if span_name != "" and span_name != span.name:
+			return false
+		if level < event.level:
+			return false
+		for key in fields:
+			if fields[key] != event.fields[key]:
+				return false
+		return true
+
+
+var filter_regex := RegEx.new()
+
+var filter_pattern = "([a-zA-Z0-9_]+)?(?:\\[(\\w+)(?:\\{((?:\\w+=\\w+,?\\s*)+)\\})?\\])?=(\\w+)"
+
+func _ready() -> void:
+	filter_regex.compile(filter_pattern)
+
+func parse_filters(filter: String) -> Array:
+	var results = filter_regex.search_all(filter)
+	assert(results != null, "Invalid filter string")
+	return results.map(
+		func(result):
+			var module = result.get_string(1)
+			var span_name = result.get_string(2)
+			var fields_string = result.get_string(3)
+			var fields = {}
+			for field in fields_string.split(",", false, 1):
+				print_debug(field)
+				var key_value = field.split("=")
+				fields[key_value[0]] = key_value[1]
+			var level = Level[result.get_string(4).capitalize()]
+			return Filter.new(module, span_name, level, fields)
+	)

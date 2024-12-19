@@ -1,5 +1,5 @@
-2024-12-12T23:33:31 [b]example[/b][b]{[/b][i]step[/i]=setup[b]}[/b]: INFO examples/test/test.gd::_ready: Game Started!
-2024-12-12T23:33:31 [b]example[/b][b]{[/b][i]step[/i]=setup[b]}[/b]: [b]child[/b][b]{[/b][i]work[/i]=texture_loading[b]}[/b]: DEBUG examples/test/test.gd::_ready: [i]system[/i]=physics Initializing systems... 🧙‍♂️
-2024-12-12T23:33:31 WARN examples/test/test.gd::_ready: Cannot find file 'data.json' 🤔
-2024-12-12T23:33:31 ERROR examples/test/test.gd::_ready: Cannot communicate with server 😱
-2024-12-12T23:33:31 [b]example[/b][b]{[/b][i]step[/i]=setup[b]}[/b]: TRACE examples/test/test.gd::_ready: This is a trace message 🕵️‍♂️
+2024-12-13T00:37:24 [b]example[/b][b]{[/b][i]step[/i]=setup[b]}[/b]: INFO examples/test/test.gd::_ready: Game Started!
+2024-12-13T00:37:24 [b]example[/b][b]{[/b][i]step[/i]=setup[b]}[/b]: [b]child[/b][b]{[/b][i]work[/i]=texture_loading[b]}[/b]: DEBUG examples/test/test.gd::_ready: [i]system[/i]=physics Initializing systems... 🧙‍♂️
+2024-12-13T00:37:24 WARN examples/test/test.gd::_ready: Cannot find file 'data.json' 🤔
+2024-12-13T00:37:24 ERROR examples/test/test.gd::_ready: Cannot communicate with server 😱
+2024-12-13T00:37:24 [b]example[/b][b]{[/b][i]step[/i]=setup[b]}[/b]: TRACE examples/test/test.gd::_ready: This is a trace message 🕵️‍♂️

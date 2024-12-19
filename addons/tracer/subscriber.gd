@@ -15,7 +15,6 @@ func init() -> void:
 	Tracer.add_child(self)
 	Tracer.sent_event.connect(on_sent_event)
 
-
 func print_stump(text: String) -> void:
 	print_rich(text)
 
@@ -27,15 +26,22 @@ func with_filters(filters: Array) -> TraceSubscriber:
 	filter_layers = filters
 	return self
 
+	
 func on_sent_event() -> void:
 	var event: Tracer.Trace = Tracer.current_event
 	if not filter_layers.is_empty():
 		if not filter_layers.any(
 			func(f):
-				return Tracer.span_stack.any(
-					func(span): return f.matches(event, span)
-					)
-				):
+				return Tracer.span_stack.filter(
+					func(span): 
+						if f.span_name == "":
+							return true
+						return f.includes(span.get_ref().level)
+				).any(
+					func(span): 
+						return f.matches(event, span.get_ref()) and f.includes(event.level)
+				)
+		):
 			return
 	var text = event.msg
 	var level_str = (
@@ -76,7 +82,10 @@ func on_sent_event() -> void:
 			.map(func(s): return s.get_ref())
 			.filter(func(s): return s != null)
 	):
-		if span.level > event.level:
+		if not filter_layers.any(
+			func(f):
+				return f.includes(span.level)
+		):
 			continue
 		var span_text = ""
 		if !span.fields.is_empty():

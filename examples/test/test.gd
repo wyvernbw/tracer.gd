@@ -30,17 +30,18 @@ func _ready():
 	# Initialize the subscriber
 	file_logger.init()
 
-	var filters = Tracer.parse_filters("info,[example]=debug")
+	var filters = Tracer.parse_filters("error,[child{work = texture_loading}]=debug")
 	print_debug(filters)
 	subscriber.with_filters(filters)
 
+	Tracer.debug("Loading graphics API")
 	var span = Tracer.span(Level.Info, "example", {"step": "setup"}).enter()
-	var child = Tracer.span(Level.Debug, "child", {"work": "texture_loading"}).enter()
+	var child = Tracer.span(Level.Info, "child", {"work": "texture_loading"}).enter()
 
 	Tracer.info("Game Started!")
 	Tracer.debug("Initializing systems... 🧙‍♂️", {"system": "physics"})
-	Tracer.warn("Cannot find file 'data.json' 🤔")
 	child.exit()
+	Tracer.warn("Cannot find file 'data.json' 🤔")
 	Tracer.error("Cannot communicate with server 😱")
 	# This will not be printed
 	Tracer.trace("This is a trace message 🕵️‍♂️")
